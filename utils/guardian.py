@@ -3,6 +3,7 @@ import re
 from nltk.tokenize import sent_tokenize
 from lxml import html
 from bs4 import BeautifulSoup
+import itertools
 
 def get_timeline(timeline_section):
     timeline = []
@@ -31,7 +32,7 @@ def get_keypoints(keypoints_section):
     return keypoints
 
 def get_summary(tree):
-    summary = {"head_summary": [], "key_events_text": [], "key_events": []}
+    summary = {"bulletin": [], "key_events": []}
     if len(tree.xpath('//div[@class="content__standfirst"]')) != 0:
         timeline_links = []
         timeline_block = tree.xpath('//div[@data-component="timeline"]')
@@ -44,19 +45,19 @@ def get_summary(tree):
             type_ = i.tag
             if i.tag == "p":
                 sum_now = {"text": [], "link": [], "key_points": [], "time": "", "type": type_}
-                sum_now["text"] = summary_normalization(i.text_content())
+                sum_now["text"] = text_normalization(summary_normalization(i.text_content()))
                 # sum_now["link"].extend(re.findall(r'https?://[A-Za-z\.]+/[A-Za-z\-_0-9/]+', html.tostring(i)))
                 for k in i.xpath(".//a"):
                     sum_now["link"].append(k.get("href"))
-                summary["head_summary"].append(sum_now)
+                summary["bulletin"].append(sum_now)
             elif i.tag == "ul":
                 for j in i.xpath(".//li"):
                     sum_now = {"text": [], "link": [], "key_points": [], "time": "", "type": type_}
-                    sum_now["text"] = summary_normalization(j.text_content())
+                    sum_now["text"] = text_normalization(summary_normalization(j.text_content()))
                     for k in j.xpath(".//a"):
                         sum_now["link"].append(k.get("href"))
-                    summary["head_summary"].append(sum_now)
-        summary["key_events_text"].extend(timeline_links)
+                    summary["bulletin"].append(sum_now)
+        summary["key_events"].extend(timeline_links)
     return summary 
 
 def extraction_date_hour(date_hour):
@@ -91,7 +92,7 @@ def extract_documents(articles):
             text_lines = []
             block_lines = article.xpath('.//div[@itemprop="articleBody"]')
             for lines in block_lines:
-                text_lines.append(text_normalization(BeautifulSoup(html.tostring(lines), "html.parser").get_text()))
+                text_lines.append(unicode(text_normalization(BeautifulSoup(html.tostring(lines), "html.parser").get_text())))
 
             """
             # Get the links inside the block
@@ -104,6 +105,7 @@ def extract_documents(articles):
             
             # Get the title of the block
             part_title = article.xpath('.//h2[@class="block-title"]')
+            block_title = ''
             if len(part_title) != 0:
                 block_title = part_title[0].text_content()
             
@@ -112,63 +114,50 @@ def extract_documents(articles):
                 continue
             
             block_kind = article.get("class")
-            is_key = False
+            is_key_event = False
             
             # Check if the block is a summary point
             section = article.get("class")
-            if re.search('is-key-event'|'is-summary', section):
-                is_key = True
+            if re.search('is-key-event|is-summary', section):
+                is_key_event = True
             
-            block_text = [line.strip() for line in text_lines if line.strip() != u""]
+            block_text = [sent_tokenize(line.strip()) for line in text_lines if line.strip() != u""]
+            block_text = list(itertools.chain.from_iterable(block_text))
             
             d_block = {"time": time_creation, "text": block_text, "block_id": block_id,
-                        "doc_title": unicode(block_title), "block_kind": block_kind,
-                         'key_event': is_key}
+                        "title": unicode(text_normalization(block_title)), "block_kind": block_kind,
+                         'is_key_event': is_key_event}
             body.append(d_block)
                        
     return body       
     
 
-def get_documents(tree):
+def get_documents_guardian(tree):
     article = tree.xpath('.//div[@itemprop="liveBlogUpdate"]')
     documents = extract_documents(article)
     if not documents:
         article = tree.xpath('.//div[@itemprop="articleBody"]')
         documents = extract_documents(article)
+    return documents
 
-def process_html(blog_id, url, html_content):
+def process_html_guardian(blog_id, url, html_content):
     
     tree = html.fromstring(html_content)
     # the title
     title = tree.xpath("//title/text()")
-
-    # Get the category
-    if len(tree.xpath('//div[@class="content__labels "]')) != 0:
-        category = tree.xpath('//div[@class="content__labels "]')[0].xpath(".//a/text()")
-    elif len(tree.xpath('//div[@class="content__section-label"]')) != 0 and len(
-            tree.xpath('//div[@class="content__series-label"]')) != 0:
-        category = {"section_text": tree.xpath('//div[@class="content__section-label"]')[0].xpath(".//a/text()"),
-                    "section_link": tree.xpath('//div[@class="content__section-label"]')[0].xpath(".//a")[0].get(
-                        "href"),
-                    "series_text": tree.xpath('//div[@class="content__series-label"]')[0].xpath(".//a/text()"),
-                    "series_link": tree.xpath('//div[@class="content__series-label"]')[0].xpath(".//a")[0].get("href")}
-    elif len(tree.xpath('//div[@class="content__section-label"]')) != 0:
-        category = {"section_text": tree.xpath('//div[@class="content__section-label"]')[0].xpath(".//a/text()"),
-                    "section_link": tree.xpath('//div[@class="content__section-label"]')[0].xpath(".//a")[0].get(
-                        "href")}
-
-    elif len(tree.xpath('//div[@class="content__series-label"]')) != 0:
-        category = {"series_text": tree.xpath('//div[@class="content__series-label"]')[0].xpath(".//a/text()"),
-                    "series_link": tree.xpath('//div[@class="content__series-label"]')[0].xpath(".//a")[0].get("href")}
-
-    else:
-        category = ""
     
-    documents = get_documents(tree)
+    documents = get_documents_guardian(tree)
     summary = get_summary(tree)
     
-    data = {'blog_id': blog_id, 'url': url, 'category': category, 'genre': get_genre(url),
-            'title': title, 'summary': summary, 'documents': documents}
+    summary_text = [text_normalization(key_event['text']) for key_event in summary['key_events']]
+    genre = get_genre(url)
+    if len(summary_text) > 2 and not re.search('sport|football|cricket', genre):
+        quality = 'high'
+    else:
+        quality = 'low'
+    
+    data = {'blog_id': blog_id, 'url': url, 'genre': genre,
+            'title': title[0], 'summary': summary_text, 'summary_block': summary, 'documents': documents, 'quality': quality}
     
     return data
 
@@ -216,7 +205,7 @@ def text_normalization(text):
     text = re.sub(u"pic[^ \n]+", u'', text)
     text = re.sub(u"Photograph: [a-zA-Z]+", u'', text)
 
-    #BBC specific twitter:
+    #BBC specific twitter
     text = re.sub(u"twitter: [^\s]+\s", u'', text)
     text = re.sub(u"twitter: ", u'', text)  
     text = re.sub(u"http[^ \n]+", u'', text)
@@ -228,7 +217,15 @@ def text_normalization(text):
     text = re.sub(u"[*]",u"", text)
     text = re.sub(u"\-+",u"-", text)
     text = re.sub(u'^ ',u'', text)
+    
+    text = re.sub(u'\u00e2\u0080\u0093',u"", text)
+    text = re.sub(u'\u0080\u009c',u"", text)
+    text = re.sub(u'\u0080\u009d',u"", text)
+    text = re.sub(u'\u0080\u0099',u"'", text)
+    text = re.sub(u'\u0080\u0093',u"", text)
     text = re.sub(u'\u00E2',u'', text)
+    text = re.sub(u'\u0080\u0094',u'', text)
+    text = re.sub(u'\u00c3\u00b3',u'', text)
     text = re.sub(u'\u00E0',u'a', text)
     text = re.sub(u'\u00E9',u'e', text)
     text = re.sub(u'\u2019',u"'", text)
