@@ -70,7 +70,7 @@ mkdir driver
 cp chromedriver driver/
 ```
 
-To download the 
+To download the processed (or) raw URLs:
 
 ```
 python generate_data.py --corpus=[guardian/bbc] --mode=download --data_type=[processed/raw]
@@ -82,7 +82,7 @@ python generate_data.py --corpus=[guardian/bbc] --mode=download --data_type=[pro
 
 ### Fetch URLs
 
-To crawl the guardian website and query for BBC URLs
+To crawl the guardian website and query for BBC URLs:
 
 ```
 python generate_data.py --corpus=[guardian/bbc] --mode=fetch_urls 
