@@ -20,7 +20,12 @@ If you reuse this corpus and software, please use the following citation:
 	location = {Miyazaki, Japan},
 }
 ```
-> **Abstract:** Live blogs are an increasingly popular news format to cover breaking news and live events in online journalism. Online news websites around the world are using this medium to give their readers a minute by minute update on an event. In this paper, we study an efficient way of collecting large corpora for live blog summarization. We make our corpus publicly available in order to encourage the community to advance research and replicate our results.
+> **Abstract:** Live blogs are an increasingly popular news format to cover breaking news and live events in online journalism. 
+Online news websites around the world are using this medium to give their readers a minute by minute update on an event.
+Good summaries enhance the value of the live blogs for a reader but are often not available.
+In this paper, we study a way of collecting corpora for automatic live blog summarization.
+In an empirical evaluation using well-known state-of-the-art summarization systems, we show that live blogs corpus poses new challenges in the field of summarization.
+We make our tools publicly available to reconstruct the corpus to encourage the research community and replicate our results. 
 
 Contact person: Avinesh P.V.S., avinesh@aiphes.tu-darmstadt.de
                 Maxime Peyrard, peyrard@aiphes.tu-darmstadt.de     
@@ -46,28 +51,30 @@ Installation
 
 1. Install required python packages.
 
-'''
+```
 pip install -r requirements.txt
-'''
+```
 
 2. Download ROUGE package from the [link][https://www.isi.edu/licensed-sw/see/rouge/] and place it in the rouge directory 
 
-'''
+```
 mv RELEASE-1.5.5 rouge/
-'''
+```
 
 ### Download URLs
 
 For BBC, install selenium package and download [chrome driver][https://sites.google.com/a/chromium.org/chromedriver/] to crawl ajax links.
-'''
+
+```
 mkdir driver
 cp chromedriver driver/
-'''
+```
 
 To download the 
-'''
+
+```
 python generate_data.py --corpus=[guardian/bbc] --mode=download --data_type=[processed/raw]
-'''
+```
 
 ### Run the Baseline
 
@@ -76,7 +83,8 @@ python generate_data.py --corpus=[guardian/bbc] --mode=download --data_type=[pro
 ### Fetch URLs
 
 To crawl the guardian website and query for BBC URLs
-'''
+
+```
 python generate_data.py --corpus=[guardian/bbc] --mode=fetch_urls 
-'''
+```
 
