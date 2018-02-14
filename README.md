@@ -1,6 +1,10 @@
 # Live Blog Corpus for Summarization
 
-In this project, we develop a corpus for Live Blog Summarization. We propose .
+In this project, we develop a corpus for Live Blog Summarization. This repository contains scripts to generate live blog summarization corpus using
+The Guardian and BBC live blogs.
+
+For a detailed description of this corpus please read:
+[Live Blog Corpus for Summarization][link], P.V.S. et al., LREC 2018.
 
 If you reuse this corpus and software, please use the following citation:
 
@@ -11,7 +15,7 @@ If you reuse this corpus and software, please use the following citation:
 	organization = {Association for Computational Linguistics},
 	booktitle = {Proceedings of the 11th International Conference on Language Resources and Evaluation (LREC)},
 	pages = {to appear},
-	month = may,
+	Xmonth = may,
 	year = {2018},
 	location = {Miyazaki, Japan},
 }
@@ -29,9 +33,11 @@ Don't hesitate to send us an e-mail or report an issue, if something is broken (
 
 > This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication. 
 
+## Download Processed Version
 
-Prerequisites
--------------
+In case the script does not work you can also contact the authors for the processed data sets. This should help where the underlying links are not accessible.
+
+### Prerequisites
 
 * python >= 2.7 (tested with 2.7.6)
 
@@ -40,11 +46,37 @@ Installation
 
 1. Install required python packages.
 
-        >> pip install -r requirements.txt
+'''
+pip install -r requirements.txt
+'''
 
-2. Download ROUGE package from the [link](https://www.isi.edu/licensed-sw/see/rouge/) and place it in the rouge directory 
+2. Download ROUGE package from the [link][https://www.isi.edu/licensed-sw/see/rouge/] and place it in the rouge directory 
 
-        >> mv RELEASE-1.5.5 rouge/
-        		 
-ToRun
--------
+'''
+mv RELEASE-1.5.5 rouge/
+'''
+
+### Download URLs
+
+For BBC, install selenium package and download [chrome driver][https://sites.google.com/a/chromium.org/chromedriver/] to crawl ajax links.
+'''
+mkdir driver
+cp chromedriver driver/
+'''
+
+To download the 
+'''
+python generate_data.py --corpus=[guardian/bbc] --mode=download --data_type=[processed/raw]
+'''
+
+### Run the Baseline
+
+
+
+### Fetch URLs
+
+To crawl the guardian website and query for BBC URLs
+'''
+python generate_data.py --corpus=[guardian/bbc] --mode=fetch_urls 
+'''
+

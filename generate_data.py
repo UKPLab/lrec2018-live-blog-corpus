@@ -358,14 +358,14 @@ def DownloadMode(data_path, corpus):
             web_driver.close()
         print 'Interrupted by user'
 
-        missing_urls.extend(set(urls) - set(collected_urls))
+    missing_urls.extend(set(urls) - set(collected_urls))
 
-        WriteUrls('%s/missing_urls.txt' % corpus, missing_urls)
-    
-        if missing_urls:
-            print ('%d URLs couldn\'t be downloaded, see %s/missing_urls.txt.'
-                         % (len(missing_urls), corpus))
-            print 'Try and run the command again to download the missing URLs.'
+    WriteUrls(missing_urls_filename, missing_urls)
+
+    if missing_urls:
+        print ('%d URLs couldn\'t be downloaded, see %s/missing_urls.txt.'
+                     % (len(missing_urls), corpus))
+        print 'Try and run the command again to download the missing URLs.'
                     
     if web_driver:
         web_driver.close()
@@ -432,7 +432,7 @@ def get_urls(corpus, tree, urls):
     for item in tree.xpath("//a[@data-link-name='article']"):
         url = item.get("href")
 
-        if re.search(pattern, url): 
+        if re.search(pattern, url) and url not in urls: 
             urls.append(url)
     
     return urls
@@ -472,15 +472,14 @@ def FetchMode(data_path, corpus):
     if corpus == 'bbc':
         urls = BootCatUrls()
         
-    WriteUrls(urls_filename, urls)
+    WriteUrls(urls_filename, list(set(urls)))
 
 def main():
-    parser = argparse.ArgumentParser(
-                    description='Generate the Summarization Corpus')
+    parser = argparse.ArgumentParser(description='Generate the Summarization Corpus')
     parser.add_argument('--corpus', choices=['bbc', 'guardian'], required=True)
     parser.add_argument('--data_type', choices=['raw', 'processed'])
     parser.add_argument('--mode', choices=['fetch_urls', 'download', 'archive_urls'], required=True)
-    parser.add_argument('--request_parallelism', type=int, default=200)
+    parser.add_argument('--request_parallelism', type=int, default=1)
     args = parser.parse_args()
     
     if args.mode == 'fetch_urls':
