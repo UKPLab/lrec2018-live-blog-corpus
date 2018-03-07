@@ -31,6 +31,7 @@ def mkdirp(path):
     Args:
         path: The path to check or create
     """
+    print(path)
     if path == '':
         return
     try:
@@ -489,12 +490,10 @@ def main():
         data_path = path.join(base_dir, 'data/%s/' % (args.data_type))
         download_path = '%s/downloads/%s/' % (data_path, args.corpus)
         if not os.path.isdir(download_path):
-            mkdirp(path)
+            mkdirp(download_path)
         DownloadMode(data_path, args.corpus)
     elif args.mode == 'archive_urls':
         UrlMode(path.join(base_dir, 'data/processed/'), args.corpus, args.request_parallelism)
 
 if __name__ == '__main__':
     main()
-
-
