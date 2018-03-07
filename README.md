@@ -4,7 +4,7 @@ In this project, we develop a corpus for Live Blog Summarization. This repositor
 The Guardian and BBC live blogs.
 
 For a detailed description of this corpus please read:
-[Live Blog Corpus for Summarization][link], P.V.S. et al., LREC 2018.
+[Live Blog Corpus for Summarization](), P.V.S. et al., LREC 2018.
 
 If you reuse this corpus and software, please use the following citation:
 
@@ -27,12 +27,11 @@ In this paper, we study a way of collecting corpora for automatic live blog summ
 In an empirical evaluation using well-known state-of-the-art summarization systems, we show that live blogs corpus poses new challenges in the field of summarization.
 We make our tools publicly available to reconstruct the corpus to encourage the research community and replicate our results. 
 
-Contact person: Avinesh P.V.S., avinesh@aiphes.tu-darmstadt.de
-                Maxime Peyrard, peyrard@aiphes.tu-darmstadt.de     
-
-http://www.ukp.tu-darmstadt.de/
-
-http://www.tu-darmstadt.de/
+**Contact person:**
+* Avinesh P.V.S., first_name AT aiphes.tu-darmstadt.de
+* Maxime Peyrard, last_name AT aiphes.tu-darmstadt.de     
+* http://www.ukp.tu-darmstadt.de/
+* http://www.tu-darmstadt.de/
 
 Don't hesitate to send us an e-mail or report an issue, if something is broken (and it shouldn't be) or if you have further questions.
 
@@ -55,7 +54,7 @@ Installation
 pip install -r requirements.txt
 ```
 
-2. Download ROUGE package from the [link][https://www.isi.edu/licensed-sw/see/rouge/] and place it in the rouge directory 
+2. Download ROUGE package from the [link](https://www.isi.edu/licensed-sw/see/rouge/) and place it in the rouge directory 
 
 ```
 mv RELEASE-1.5.5 rouge/
@@ -63,7 +62,7 @@ mv RELEASE-1.5.5 rouge/
 
 ### Download URLs
 
-For BBC, install selenium package and download [chrome driver][https://sites.google.com/a/chromium.org/chromedriver/] to crawl ajax links.
+For BBC, install selenium package and download [chrome driver](https://sites.google.com/a/chromium.org/chromedriver/) to crawl ajax links.
 
 ```
 mkdir driver
