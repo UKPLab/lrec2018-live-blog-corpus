@@ -54,7 +54,13 @@ Installation
 pip install -r requirements.txt
 ```
 
-2. Download ROUGE package from the [link](https://www.isi.edu/licensed-sw/see/rouge/) and place it in the rouge directory 
+2. In case you don't already have it, download NLTK's tokenization model.
+
+```
+ python -c "import nltk; nltk.download('punkt')"
+```
+
+3. Download ROUGE package from the [link](https://www.isi.edu/licensed-sw/see/rouge/) and place it in the rouge directory 
 
 ```
 mv RELEASE-1.5.5 rouge/
