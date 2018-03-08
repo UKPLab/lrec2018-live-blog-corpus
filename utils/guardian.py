@@ -141,24 +141,24 @@ def get_documents_guardian(tree):
     return documents
 
 def process_html_guardian(blog_id, url, html_content):
-    
+
     tree = html.fromstring(html_content)
     # the title
     title = tree.xpath("//title/text()")
-    
+
     documents = get_documents_guardian(tree)
     summary = get_summary(tree)
-    
-    summary_text = [text_normalization(key_event['text']) for key_event in summary['key_events']]
+
+    summary_text = [summary_normalization(key_event['text']) for key_event in summary['key_events']]
     genre = get_genre(url)
     if len(summary_text) > 2 and not re.search('sport|football|cricket', genre):
         quality = 'high'
     else:
         quality = 'low'
-    
+
     data = {'blog_id': blog_id, 'url': url, 'genre': genre,
             'title': title[0], 'summary': summary_text, 'summary_block': summary, 'documents': documents, 'quality': quality}
-    
+
     return data
 
 
@@ -180,7 +180,7 @@ def text_normalization(text):
     Remove & Replace unnessary characters
     Parameter argument:
     text: a string (e.g. '.... *** New York N.Y is a city...')
-    
+
     Return:
     text: a string (New York N.Y is a city.)
     '''

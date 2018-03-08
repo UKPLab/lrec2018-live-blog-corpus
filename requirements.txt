@@ -6,3 +6,5 @@ beautifulsoup4>=4.6.0
 PuLP>=1.6.2
 numpy>=1.12.0
 scipy>=0.17.1
+rouge>=0.2.1
+sumy>=0.7.0

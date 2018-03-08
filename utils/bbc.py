@@ -102,17 +102,19 @@ def process_html_bbc(blog_id, url, WEBPAGE_content, id_=-1):
 
     title = tree.xpath("//title/text()")
     summary = get_summary(tree)
-    
+
     documents = get_documents_bbc(tree)
     genre = get_genre_bbc(url)
     if len(summary) > 2 and not re.search('sport|football|cricket', genre):
         quality = 'high'
     else:
         quality = 'low'
-    
+
+    summary_text = [summary_normalization(sent) for sent in summary]
+
     data = {'blog_id': blog_id, 'url': url, 'genre': genre,
-            'title': title[0], 'summary': summary, 'documents': documents, 'quality': quality}
-    
+            'title': title[0], 'summary': summary_text, 'documents': documents, 'quality': quality}
+
     return data
 
 def get_genre_bbc(url):
@@ -142,6 +144,19 @@ def remove_question_mark_and_point(url):
         if poi != -1:
             url = url[:poi]
     return url
+
+def summary_normalization(summary):
+    try:
+        summary = unicode(summary)
+    except:
+        pass
+    summary = text_normalization(summary)
+    summary = re.sub(u" {2,10}", u". ", summary)
+    if summary != u"":
+        summary = re.sub(u'[a-zA-Z]$', summary[-1] + ".", summary)       
+        
+    return summary
+
 
 
 def text_normalization(text):

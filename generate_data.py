@@ -23,24 +23,8 @@ sys.path.append(base_dir)
 
 from utils.guardian import process_html_guardian, get_documents_guardian
 from utils.bbc import process_html_bbc
-
-
-def mkdirp(path):
-    """Checks if a path exists otherwise creates it
-    Each line in the filename should contain a list of URLs separated by comma.
-    Args:
-        path: The path to check or create
-    """
-    print(path)
-    if path == '':
-        return
-    try:
-        os.makedirs(path)
-    except OSError as exc: # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else: raise
-
+from utils.misc import mkdirp
+from utils.misc import ProgressBar
 
 def WriteUrls(filename, urls):
     """Writes a list of URLs to a file.
@@ -244,32 +228,6 @@ def DownloadUrl(data_path, url, corpus, web_driver=None, max_attempts=5, timeout
 
         return None
 
-class ProgressBar(object):
-        """Simple progress bar.
-        Output example:
-                100.00% [2152/2152]
-        """
-
-        def __init__(self, total=100, stream=sys.stderr):
-                self.total = total
-                self.stream = stream
-                self.last_len = 0
-                self.curr = 0
-
-        def Increment(self):
-                self.curr += 1
-                self.PrintProgress(self.curr)
-
-                if self.curr == self.total:
-                        print ''
-
-        def PrintProgress(self, value):
-                self.stream.write('\b' * self.last_len)
-                pct = 100 * self.curr / float(self.total)
-                out = '{:.2f}% [{}/{}]'.format(pct, value, self.total)
-                self.last_len = len(out)
-                self.stream.write(out)
-                self.stream.flush()
 
 def UrlMode(data_path, corpus, request_parallelism):
     """Finds Wayback Machine URLs and writes them to disk.
@@ -380,7 +338,7 @@ def DownloadMode_parallel(data_path, corpus, request_parallelism):
     """
 
     missing_urls = []
-    
+
     print 'Downloading URLs for the %s set:' % corpus
 
     urls_filename = '%s/urls/wayback_%s_urls.txt' % (data_path, corpus)
@@ -423,36 +381,33 @@ def get_urls(corpus, tree, urls):
         tree: html content of the url
         urls: urls to be appended to
     Return:
-        append the list of urls 
-    
+        append the list of urls
+
     """
-    
+
     if corpus == 'guardian':
         pattern = "www.theguardian.com"
-        
+
     for item in tree.xpath("//a[@data-link-name='article']"):
         url = item.get("href")
 
         if re.search(pattern, url) and url not in urls: 
             urls.append(url)
-    
+
     return urls
 
 def BootCatUrls(seed_list):
     urls = []
-    
-    
     return urls
 
 def FetchMode(data_path, corpus):
     """Get the URLs for the specified corpus.
     Args:
         corpus: A corpus.
-    
     """
     urls = []
     urls_filename = '%s/urls/%s_urls.txt' % (data_path, corpus)
-    
+
     if corpus == 'guardian':
         req_url = 'http://www.theguardian.com/tone/minutebyminute/?page=1'
         while(1): 
@@ -472,7 +427,7 @@ def FetchMode(data_path, corpus):
                 break  
     if corpus == 'bbc':
         urls = BootCatUrls()
-        
+
     WriteUrls(urls_filename, list(set(urls)))
 
 def main():
@@ -482,7 +437,7 @@ def main():
     parser.add_argument('--mode', choices=['fetch_urls', 'download', 'archive_urls'], required=True)
     parser.add_argument('--request_parallelism', type=int, default=1)
     args = parser.parse_args()
-    
+
     if args.mode == 'fetch_urls':
         data_path = path.join(base_dir, 'data/%s/' % ('raw'))
         FetchMode(data_path, args.corpus)

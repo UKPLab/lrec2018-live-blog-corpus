@@ -4,7 +4,7 @@ In this project, we develop a corpus for Live Blog Summarization. This repositor
 The Guardian and BBC live blogs.
 
 For a detailed description of this corpus please read:
-[Live Blog Corpus for Summarization](), P.V.S. et al., LREC 2018.
+[Live Blog Corpus for Summarization](https://www.ukp.tu-darmstadt.de/fileadmin/user_upload/Group_AIPHES/publications/2018/2018_LREC_Live_Blog_Summarization_AvP_MaP_ChM-CameraReady.pdf), P.V.S. et al., LREC 2018.
 
 If you reuse this corpus and software, please use the following citation:
 
@@ -54,16 +54,10 @@ Installation
 pip install -r requirements.txt
 ```
 
-2. In case you don't already have it, download NLTK's tokenization model.
+2. In case you don't already have it, download NLTK's tokenization model and stopwords.
 
 ```
- python -c "import nltk; nltk.download('punkt')"
-```
-
-3. Download ROUGE package from the [link](https://www.isi.edu/licensed-sw/see/rouge/) and place it in the rouge directory 
-
-```
-mv RELEASE-1.5.5 rouge/
+ python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 ```
 
 ### Download URLs
@@ -83,11 +77,16 @@ python generate_data.py --corpus=[guardian/bbc] --mode=download --data_type=[pro
 
 ### Run the Baseline
 
+To run the baseline systems and get scores:
 
+```
+python summarize/baseline.py -d guardian -l english
+python utils/aggregate_baselines.py -d guardian
+```
 
 ### Fetch URLs
 
-To crawl the guardian website and query for BBC URLs:
+To fetch the URLS of the guardian and BBC liveblogs:
 
 ```
 python generate_data.py --corpus=[guardian/bbc] --mode=fetch_urls 
