@@ -34,41 +34,40 @@ def load_data(data_path):
     return doc_data, summaries
 
 
-def extract_ngrams(sentences, stoplist, stemmer, language='english', n=2):
-    """Extract the ngrams of words from the input sentences.
+def extract_ngrams(sentence, stoplist, stemmer, language='english', n=2):
+    """Extract the ngrams of words from the input text.
 
     Args:
         n (int): the number of words for ngrams, defaults to 2
     """
     concepts = []
-    for i, sentence in enumerate(sentences):
+    
+    # for each ngram of words
+    tokens = sent2tokens(sentence, language)
+    for j in range(len(tokens)-(n-1)):
 
-        # for each ngram of words
-        tokens = sent2tokens(sentence, language)
-        for j in range(len(tokens)-(n-1)):
+        # initialize ngram container
+        ngram = []
 
-            # initialize ngram container
-            ngram = []
+        # for each token of the ngram
+        for k in range(j, j+n):
+            ngram.append(tokens[k].lower())
 
-            # for each token of the ngram
-            for k in range(j, j+n):
-                ngram.append(tokens[k].lower())
+        # do not consider ngrams containing punctuation marks
+        marks = [t for t in ngram if not re.search('[a-zA-Z0-9]', t)]
+        if len(marks) > 0:
+            continue
 
-            # do not consider ngrams containing punctuation marks
-            marks = [t for t in ngram if not re.search('[a-zA-Z0-9]', t)]
-            if len(marks) > 0:
-                continue
+        # do not consider ngrams composed of only stopwords
+        stops = [t for t in ngram if t in stoplist]
+        if len(stops) == len(ngram):
+            continue
 
-            # do not consider ngrams composed of only stopwords
-            stops = [t for t in ngram if t in stoplist]
-            if len(stops) == len(ngram):
-                continue
+        # stem the ngram
+        ngram = [stemmer.stem(t) for t in ngram]
 
-            # stem the ngram
-            ngram = [stemmer.stem(t) for t in ngram]
-
-            # add the ngram to the concepts
-            concepts.append(' '.join(ngram))
+        # add the ngram to the concepts
+        concepts.append(' '.join(ngram))
     return concepts
 
 def untokenize(tokens):

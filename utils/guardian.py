@@ -102,35 +102,33 @@ def extract_documents(articles):
             links.extend(re.findall(r'https?://[a-z\.]+/[a-z\-_0-9/]+',
                                     html.tostring(article)))
             """
-            
+
             # Get the title of the block
             part_title = article.xpath('.//h2[@class="block-title"]')
             block_title = ''
             if len(part_title) != 0:
                 block_title = part_title[0].text_content()
-            
+
             block_id = article.get("id")
             if block_id is None:
                 continue
-            
+
             block_kind = article.get("class")
             is_key_event = False
-            
+
             # Check if the block is a summary point
             section = article.get("class")
             if re.search('is-key-event|is-summary', section):
                 is_key_event = True
-            
+
             block_text = [sent_tokenize(line.strip()) for line in text_lines if line.strip() != u""]
             block_text = list(itertools.chain.from_iterable(block_text))
-            
+
             d_block = {"time": time_creation, "text": block_text, "block_id": block_id,
                         "title": unicode(text_normalization(block_title)), "block_kind": block_kind,
                          'is_key_event': is_key_event}
             body.append(d_block)
-                       
-    return body       
-    
+    return body
 
 def get_documents_guardian(tree):
     article = tree.xpath('.//div[@itemprop="liveBlogUpdate"]')

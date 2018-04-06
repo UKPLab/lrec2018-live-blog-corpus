@@ -2,6 +2,13 @@ import os
 import errno
 import logging
 import sys
+import codecs
+
+def write_to_file(text, filename):
+    fp = codecs.open(filename, 'w', 'utf-8', errors='ignore')
+    fp.write(str(text))
+    fp.close()
+
 
 def mkdirp(path):
     """Checks if a path exists otherwise creates it
@@ -9,7 +16,6 @@ def mkdirp(path):
     Args:
         path: The path to check or create
     """
-    print(path)
     if path == '':
         return
     try:
@@ -43,22 +49,22 @@ class ProgressBar(object):
         """
 
         def __init__(self, total=100, stream=sys.stderr):
-                self.total = total
-                self.stream = stream
-                self.last_len = 0
-                self.curr = 0
+            self.total = total
+            self.stream = stream
+            self.last_len = 0
+            self.curr = 0
 
         def Increment(self):
-                self.curr += 1
-                self.PrintProgress(self.curr)
+            self.curr += 1
+            self.PrintProgress(self.curr)
 
-                if self.curr == self.total:
-                        print ''
+            if self.curr == self.total:
+                print('')
 
         def PrintProgress(self, value):
-                self.stream.write('\b' * self.last_len)
-                pct = 100 * self.curr / float(self.total)
-                out = '{:.2f}% [{}/{}]'.format(pct, value, self.total)
-                self.last_len = len(out)
-                self.stream.write(out)
-                self.stream.flush()
+            self.stream.write('\b' * self.last_len)
+            pct = 100 * self.curr / float(self.total)
+            out = '{:.2f}% [{}/{}]'.format(pct, value, self.total)
+            self.last_len = len(out)
+            self.stream.write(out)
+            self.stream.flush()

@@ -53,4 +53,4 @@ class AbstractSummarizer(object):
         # sort sentences by their order in document
         infos = sorted(infos[:index], key=attrgetter("order"))
 
-        return [unicode(i.sentence) for i in infos]
+        return [str(i.sentence) for i in infos]

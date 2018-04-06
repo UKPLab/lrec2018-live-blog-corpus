@@ -6,7 +6,6 @@ import os
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.snowball import SnowballStemmer
-from rouge import Rouge
 import argparse
 import logging
 
@@ -107,7 +106,7 @@ class ExtractiveUpperbound():
 
     def get_ref_ngrams(self, N):
         for summary in self.models:
-            self.ref_ngrams.extend(extract_ngrams(summary, self.stoplist, self.stemmer, self.LANGUAGE, N))
+            self.ref_ngrams.extend(extract_ngrams(" ".join(summary), self.stoplist, self.stemmer, self.LANGUAGE, N))
 
     def get_summary_text(self, summary_idx):
         return [ self.sentences[idx].untokenized_form for idx in summary_idx]
@@ -118,7 +117,7 @@ class ExtractiveUpperbound():
         A = np.zeros((len(self.sentences_idx), len(self.ref_ngrams_idx)))
         for i in self.sentences_idx:
             sent = self.sentences[i].untokenized_form
-            sngrams = list(extract_ngrams([sent], self.stoplist, self.stemmer, self.LANGUAGE, N))
+            sngrams = list(extract_ngrams(sent, self.stoplist, self.stemmer, self.LANGUAGE, N))
             for j in self.ref_ngrams_idx:
                 if self.ref_ngrams[j] in sngrams:
                     A[i][j] = 1
@@ -201,7 +200,6 @@ def get_summary_scores(algo, docs, refs, summary_size, language, rouge):
 def main():
 
     args = get_args()
-    rouge = Rouge()
     data_path = os.path.join(args.iobasedir, 'processed/downloads', args.data_set)
     log_path = os.path.join(args.iobasedir, 'logs')
     log_file = os.path.join(args.iobasedir, 'logs', 'UB.log')

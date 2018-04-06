@@ -1,6 +1,5 @@
 import sys
 import os
-from rouge import Rouge
 import argparse
 import logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -20,6 +19,7 @@ from summarize.sumy.summarizers.lex_rank import LexRankSummarizer
 from summarize.sumy.summarizers.text_rank import TextRankSummarizer
 from summarize.sumy.nlp.stemmers import Stemmer
 from nltk.corpus import stopwords
+from rouge.rouge import Rouge
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +28,10 @@ def get_args():
 
     parser = argparse.ArgumentParser(description='Upper Bound for Summarization')
     # -- summary_len: 100, 200, 400
-    parser.add_argument('-s', '--summary_size', type=str, help='Summary Length', required=False)
+    parser.add_argument('-s', '--summary_size', type=str, help='Summary Length ex:100', required=False)
 
     # --data_set: DUC2001, DUC2002, DUC2004
-    parser.add_argument('-d', '--data_set', type=str, help='Data set ex: DUC2004', required=True)
+    parser.add_argument('-d', '--data_set', type=str, help='Data set ex: bbc, guardian', required=True)
 
     # --language: english, german
     parser.add_argument('-l', '--language', type=str, help='Language: english, german', required=False,
@@ -43,14 +43,12 @@ def get_args():
 
     return args
 
-def print_scores(algo_name, summary_sents, refs, rouge):
-    hyps, refs = map(list, zip(*[[' '.join(summary_sents), ' '.join(model)] for model in refs]))
-    score = rouge.get_scores(hyps, refs, avg=True)
-    logger.info('%s: ROUGE-1: %4f %4f %4f, ROUGE-2: %4f %4f %4f, ROUGE-L: %4f %4f %4f' % (algo_name, \
-        score['rouge-1']['f'], score['rouge-1']['p'], score['rouge-1']['r'], \
-        score['rouge-2']['f'], score['rouge-2']['p'], score['rouge-2']['r'], \
-        score['rouge-l']['f'], score['rouge-l']['p'], score['rouge-l']['r']))
-
+def print_scores(algo_name, summary_sents, refs, rouge, summary_size):    
+    score = rouge(' '.join(summary_sents), refs, summary_size)
+    logger.info('%s: ROUGE-1: %4f %4f %4f, ROUGE-2: %4f %4f %4f, ROUGE-SU4: %4f %4f %4f' % (algo_name, \
+        score['rouge_1_f_score'], score['rouge_1_precision'], score['rouge_1_recall'], \
+        score['rouge_2_f_score'], score['rouge_2_precision'], score['rouge_2_recall'], \
+        score['rouge_su4_f_score'], score['rouge_su4_precision'], score['rouge_su4_recall']))
 
 def get_summary_scores(algo, docs, refs, summary_size, language, rouge):
     if algo == 'UB1':
@@ -79,14 +77,14 @@ def get_summary_scores(algo, docs, refs, summary_size, language, rouge):
 
         summarizer.stop_words = frozenset(stopwords.words(language))
         summary = summarizer(parser.document, summary_size)
-
-    print_scores(algo, summary, refs, rouge)
-
+    #print(algo, " ".join(summary))
+    print_scores(algo, summary, refs, rouge, summary_size)
 
 def main():
 
     args = get_args()
-    rouge = Rouge()
+    rouge_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'rouge/RELEASE-1.5.5/')
+    
     data_path = os.path.join(args.iobasedir, 'processed/downloads', args.data_set)
     log_path = os.path.join(args.iobasedir, 'logs')
     log_file = os.path.join(args.iobasedir, 'logs', 'baselines_%s.log' % args.data_set)
@@ -102,19 +100,21 @@ def main():
             continue
 
         if not args.summary_size:
-            summary_size = len(' '.join(refs[0]).split(' '))
+            summary_size = len(" ".join(refs[0]).split(' '))
         else:
             summary_size = int(args.summary_size)
-
+        
         logger.info('Topic ID: %s', topic)
         logger.info('###')
         logger.info('Summmary_len: %d', summary_size)
-
+        
+        rouge = Rouge(rouge_dir)
         algos = ['UB1', 'UB2', 'ICSI', 'Luhn', 'LexRank', 'TextRank', 'LSA', 'KL']
         for algo in algos:
             get_summary_scores(algo, docs, refs, summary_size, args.language, rouge)
-
+        rouge._cleanup()
         logger.info('###')
+    
 
 if __name__ == '__main__':
     main()

@@ -1,1 +1,1 @@
-from concept_based import *
+from summarize.sume.models.concept_based import *
