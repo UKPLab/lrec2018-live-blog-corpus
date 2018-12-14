@@ -27,12 +27,11 @@ In this paper, we study a way of collecting corpora for automatic live blog summ
 In an empirical evaluation using well-known state-of-the-art summarization systems, we show that live blogs corpus poses new challenges in the field of summarization.
 We make our tools publicly available to reconstruct the corpus to encourage the research community and replicate our results. 
 
-Contact person: Avinesh P.V.S., avinesh@aiphes.tu-darmstadt.de
-                Maxime Peyrard, peyrard@aiphes.tu-darmstadt.de     
-
-http://www.ukp.tu-darmstadt.de/
-
-http://www.tu-darmstadt.de/
+**Contact person:**
+* Avinesh P.V.S., first_name AT aiphes.tu-darmstadt.de
+* Maxime Peyrard, last_name AT aiphes.tu-darmstadt.de     
+* http://www.ukp.tu-darmstadt.de/
+* http://www.tu-darmstadt.de/
 
 Don't hesitate to send us an e-mail or report an issue, if something is broken (and it shouldn't be) or if you have further questions.
 
@@ -58,7 +57,7 @@ pip install -r requirements.txt
 2. Download ROUGE package from the [link](https://www.isi.edu/licensed-sw/see/rouge/) and place it in the rouge directory 
 
 ```
-mv RELEASE-1.5.5 rouge/
+ python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 ```
 
 ### Download URLs
@@ -78,11 +77,16 @@ python generate_data.py --corpus=[guardian/bbc] --mode=download --data_type=[pro
 
 ### Run the Baseline
 
+To run the baseline systems and get scores:
 
+```
+python summarize/baseline.py -d guardian -l english
+python utils/aggregate_baselines.py -d guardian
+```
 
 ### Fetch URLs
 
-To crawl the guardian website and query for BBC URLs:
+To fetch the URLS of the guardian and BBC liveblogs:
 
 ```
 python generate_data.py --corpus=[guardian/bbc] --mode=fetch_urls 

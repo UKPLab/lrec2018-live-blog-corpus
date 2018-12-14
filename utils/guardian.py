@@ -102,35 +102,33 @@ def extract_documents(articles):
             links.extend(re.findall(r'https?://[a-z\.]+/[a-z\-_0-9/]+',
                                     html.tostring(article)))
             """
-            
+
             # Get the title of the block
             part_title = article.xpath('.//h2[@class="block-title"]')
             block_title = ''
             if len(part_title) != 0:
                 block_title = part_title[0].text_content()
-            
+
             block_id = article.get("id")
             if block_id is None:
                 continue
-            
+
             block_kind = article.get("class")
             is_key_event = False
-            
+
             # Check if the block is a summary point
             section = article.get("class")
             if re.search('is-key-event|is-summary', section):
                 is_key_event = True
-            
+
             block_text = [sent_tokenize(line.strip()) for line in text_lines if line.strip() != u""]
             block_text = list(itertools.chain.from_iterable(block_text))
-            
+
             d_block = {"time": time_creation, "text": block_text, "block_id": block_id,
                         "title": unicode(text_normalization(block_title)), "block_kind": block_kind,
                          'is_key_event': is_key_event}
             body.append(d_block)
-                       
-    return body       
-    
+    return body
 
 def get_documents_guardian(tree):
     article = tree.xpath('.//div[@itemprop="liveBlogUpdate"]')
@@ -141,24 +139,24 @@ def get_documents_guardian(tree):
     return documents
 
 def process_html_guardian(blog_id, url, html_content):
-    
+
     tree = html.fromstring(html_content)
     # the title
     title = tree.xpath("//title/text()")
-    
+
     documents = get_documents_guardian(tree)
     summary = get_summary(tree)
-    
-    summary_text = [text_normalization(key_event['text']) for key_event in summary['key_events']]
+
+    summary_text = [summary_normalization(key_event['text']) for key_event in summary['key_events']]
     genre = get_genre(url)
     if len(summary_text) > 2 and not re.search('sport|football|cricket', genre):
         quality = 'high'
     else:
         quality = 'low'
-    
+
     data = {'blog_id': blog_id, 'url': url, 'genre': genre,
             'title': title[0], 'summary': summary_text, 'summary_block': summary, 'documents': documents, 'quality': quality}
-    
+
     return data
 
 
@@ -180,7 +178,7 @@ def text_normalization(text):
     Remove & Replace unnessary characters
     Parameter argument:
     text: a string (e.g. '.... *** New York N.Y is a city...')
-    
+
     Return:
     text: a string (New York N.Y is a city.)
     '''
