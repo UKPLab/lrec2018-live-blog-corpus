@@ -487,7 +487,8 @@ def main():
         FetchMode(data_path, args.corpus)
     elif args.mode == 'download':
         data_path = path.join(base_dir, 'data/%s/' % (args.data_type))
-        download_path = '%s/downloads/%s/' % (data_path, args.corpus)
+        download_path = path.join(data_path, 'downloads/%s' % (args.corpus))
+        print("Download Path:", download_path)
         if not os.path.isdir(download_path):
             mkdirp(path)
         DownloadMode(data_path, args.corpus)

@@ -4,7 +4,7 @@ In this project, we develop a corpus for Live Blog Summarization. This repositor
 The Guardian and BBC live blogs.
 
 For a detailed description of this corpus please read:
-[Live Blog Corpus for Summarization][link], P.V.S. et al., LREC 2018.
+[Live Blog Corpus for Summarization](https://tinyurl.com/yahqyhpn), P.V.S. et al., LREC 2018.
 
 If you reuse this corpus and software, please use the following citation:
 
@@ -55,7 +55,7 @@ Installation
 pip install -r requirements.txt
 ```
 
-2. Download ROUGE package from the [link][https://www.isi.edu/licensed-sw/see/rouge/] and place it in the rouge directory 
+2. Download ROUGE package from the [link](https://www.isi.edu/licensed-sw/see/rouge/) and place it in the rouge directory 
 
 ```
 mv RELEASE-1.5.5 rouge/
@@ -63,7 +63,7 @@ mv RELEASE-1.5.5 rouge/
 
 ### Download URLs
 
-For BBC, install selenium package and download [chrome driver][https://sites.google.com/a/chromium.org/chromedriver/] to crawl ajax links.
+For BBC, install selenium package and download [chrome driver](https://sites.google.com/a/chromium.org/chromedriver/) to crawl ajax links.
 
 ```
 mkdir driver
