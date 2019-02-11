@@ -12,12 +12,12 @@ If you reuse this corpus and software, please use the following citation:
 @inproceedings{TUD-CS-2018-0008,
 	title = {Live Blog Corpus for Summarization},
 	author = {P.V.S., Avinesh and Peyrard, Maxime and Meyer, Christian M.},
-	organization = {Association for Computational Linguistics},
 	booktitle = {Proceedings of the 11th International Conference on Language Resources and Evaluation (LREC)},
-	pages = {to appear},
-	Xmonth = may,
+	pages = {3197--3203},
+	month = may,
 	year = {2018},
 	location = {Miyazaki, Japan},
+	url = {http://www.lrec-conf.org/proceedings/lrec2018/pdf/317.pdf}
 }
 ```
 > **Abstract:** Live blogs are an increasingly popular news format to cover breaking news and live events in online journalism. 
