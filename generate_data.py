@@ -62,7 +62,7 @@ def WaybackUrl(urls, max_attempts=6):
 
     while attempts < max_attempts:
         try:
-            entry_req = requests.get(index_collection_url, params=payload, 
+            entry_req = requests.get(index_collection_url, params=payload,
                                      allow_redirects=False)
 
             if entry_req.status_code != requests.codes.ok:
@@ -120,12 +120,12 @@ def GetNextPage(content, corpus):
     Returns:
         The url of the next page.
     """
-    
+
     tree = html.fromstring(content)
-    
+
     if corpus == 'guardian':
         older_part = tree.xpath('//div[@class="liveblog-navigation__older"]')
-        
+
     url = ''
     if len(older_part) >= 1:
         older_part_link = older_part[0].xpath(".//a")[0].get("href")
@@ -143,7 +143,7 @@ def extend_url(url, web_driver, corpus):
     Returns:
         The html content of the overall live blog.
     """
-    
+
     web_driver.get(url)
     while(1):
         try:
@@ -152,7 +152,7 @@ def extend_url(url, web_driver, corpus):
         except:
             break
     return web_driver.page_source
-    
+
 
 def extend_guardian_docs(url, content, corpus, json_docs):
     #Loop over next pages to append the documents list
@@ -193,11 +193,11 @@ def DownloadUrl(data_path, url, corpus, web_driver=None, max_attempts=5, timeout
                 if os.path.exists(filename):
                     print('Skip, file already exists: %s' % (hash_val))
                     break
-                
+
                 if corpus == 'guardian':
                     req = requests.get(url, allow_redirects=True, timeout=timeout)
                     if req.status_code == requests.codes.ok:
-                        content = req.text.encode(req.encoding) 
+                        content = req.text.encode(req.encoding)
                         json_data = process_html_guardian(hash_val, url, content)
                         json_data['documents'] = extend_guardian_docs(url, content, corpus, json_data['documents'])
                     elif (req.status_code in [301, 302, 404, 503] and attempts == max_attempts - 1):
@@ -205,12 +205,12 @@ def DownloadUrl(data_path, url, corpus, web_driver=None, max_attempts=5, timeout
                 if corpus == 'bbc':
                     content = extend_url(url, web_driver, corpus)
                     json_data = process_html_bbc(hash_val, url, content)
-                    
+
                 with open(filename, 'w') as f:
                     f.write(json.dumps(json_data))
-                        
+
                 return json_data
-                
+
             except requests.exceptions.ConnectionError:
                     pass
             except requests.exceptions.ContentDecodingError:
@@ -289,7 +289,7 @@ def DownloadMode(data_path, corpus):
         web_driver = webdriver.Chrome(driver_path)
 
     missing_urls = []
-    
+
     print 'Downloading URLs for the %s set:' % corpus
 
     urls_filename = '%s/urls/%s_urls.txt' % (data_path, corpus)
@@ -301,9 +301,9 @@ def DownloadMode(data_path, corpus):
         urls = list(set(urls).intersection(ReadUrls(missing_urls_filename)))
 
     progress_bar = ProgressBar(len(urls))
-    
+
     collected_urls = []
-    try: 
+    try:
         for url in urls:
             try:
                 url, json_data = DownloadMapper((data_path, url, corpus, web_driver))
@@ -311,7 +311,7 @@ def DownloadMode(data_path, corpus):
             except:
                 pass
             progress_bar.Increment()
-    
+
     except KeyboardInterrupt:
         if web_driver:
             web_driver.close()
@@ -325,7 +325,7 @@ def DownloadMode(data_path, corpus):
         print ('%d URLs couldn\'t be downloaded, see %s/missing_urls.txt.'
                      % (len(missing_urls), corpus))
         print 'Try and run the command again to download the missing URLs.'
-                    
+
     if web_driver:
         web_driver.close()
 
@@ -391,7 +391,7 @@ def get_urls(corpus, tree, urls):
     for item in tree.xpath("//a[@data-link-name='article']"):
         url = item.get("href")
 
-        if re.search(pattern, url) and url not in urls: 
+        if re.search(pattern, url) and url not in urls:
             urls.append(url)
 
     return urls
@@ -410,12 +410,12 @@ def FetchMode(data_path, corpus):
 
     if corpus == 'guardian':
         req_url = 'http://www.theguardian.com/tone/minutebyminute/?page=1'
-        while(1): 
+        while(1):
             print(req_url)
             req = requests.get(req_url, allow_redirects=True, timeout=5)
             if req.status_code == requests.codes.ok:
-                content = req.text.encode(req.encoding) 
-                tree = html.fromstring(content)    
+                content = req.text.encode(req.encoding)
+                tree = html.fromstring(content)
                 urls = get_urls(corpus, tree, urls)
                 next_ref = tree.xpath("//a[@data-link-name='Pagination view next']")
                 if next_ref:
@@ -424,7 +424,7 @@ def FetchMode(data_path, corpus):
                     break
             elif (req.status_code in [301, 302, 404, 503]):
                 print(req.status_code)
-                break  
+                break
     if corpus == 'bbc':
         urls = BootCatUrls()
 
@@ -443,7 +443,8 @@ def main():
         FetchMode(data_path, args.corpus)
     elif args.mode == 'download':
         data_path = path.join(base_dir, 'data/%s/' % (args.data_type))
-        download_path = '%s/downloads/%s/' % (data_path, args.corpus)
+        download_path = path.join(data_path, 'downloads/%s' % (args.corpus))
+        print("Download Path:", download_path)
         if not os.path.isdir(download_path):
             mkdirp(download_path)
         DownloadMode(data_path, args.corpus)
