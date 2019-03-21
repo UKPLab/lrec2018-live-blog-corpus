@@ -31,7 +31,10 @@ def get_args():
     parser.add_argument('-s', '--summary_size', type=str, help='Summary Length ex:100', required=False)
 
     # --data_set: DUC2001, DUC2002, DUC2004
-    parser.add_argument('-d', '--data_set', type=str, help='Data set ex: bbc, guardian', required=True)
+    parser.add_argument('--data_set', type=str, help='Data set ex: bbc, guardian', required=True)
+
+    # --data_set: DUC2001, DUC2002, DUC2004
+    parser.add_argument('--data_setpath', type=str, help='Data set ex: processed/liveblogs_unp/bbc/test', required=True)
 
     # --language: english, german
     parser.add_argument('-l', '--language', type=str, help='Language: english, german', required=False,
@@ -45,39 +48,43 @@ def get_args():
 
 def print_scores(algo_name, summary_sents, refs, rouge, summary_size):    
     score = rouge(' '.join(summary_sents), refs, summary_size)
-    logger.info('%s: ROUGE-1: %4f %4f %4f, ROUGE-2: %4f %4f %4f, ROUGE-SU4: %4f %4f %4f' % (algo_name, \
+    logger.info('%s: ROUGE-1: %4f %4f %4f, ROUGE-2: %4f %4f %4f, ROUGE-L: %4f %4f %4f' % (algo_name, \
         score['rouge_1_f_score'], score['rouge_1_precision'], score['rouge_1_recall'], \
         score['rouge_2_f_score'], score['rouge_2_precision'], score['rouge_2_recall'], \
-        score['rouge_su4_f_score'], score['rouge_su4_precision'], score['rouge_su4_recall']))
+        score['rouge_l_f_score'], score['rouge_l_precision'], score['rouge_l_recall']))
 
 def get_summary_scores(algo, docs, refs, summary_size, language, rouge):
-    if algo == 'UB1':
-        summarizer = ExtractiveUpperbound(language)
-        summary = summarizer(docs, refs, summary_size, ngram_type=1)
-    elif algo == 'UB2':
-        summarizer = ExtractiveUpperbound(language)
-        summary = summarizer(docs, refs, summary_size, ngram_type=2)
-    elif algo == 'ICSI':
-        summarizer = SumeWrap(language)
-        summary = summarizer(docs, summary_size)
-    else:
-        doc_string = u'\n'.join([u'\n'.join(doc_sents) for doc_sents in docs]) 
-        parser = PlaintextParser.from_string(doc_string, Tokenizer(language))
-        stemmer = Stemmer(language)
-        if algo == 'LSA':
-            summarizer = LsaSummarizer(stemmer)
-        if algo == 'KL':
-            summarizer = KLSummarizer(stemmer)
-        if algo == 'Luhn':
-            summarizer = LuhnSummarizer(stemmer)
-        if algo == 'LexRank':
-            summarizer = LexRankSummarizer(stemmer)
-        if algo == 'TextRank':
-            summarizer = TextRankSummarizer(stemmer)
+    try:
+        if algo == 'UB1':
+            summarizer = ExtractiveUpperbound(language)
+            summary = summarizer(docs, refs, summary_size, ngram_type=1)
 
-        summarizer.stop_words = frozenset(stopwords.words(language))
-        summary = summarizer(parser.document, summary_size)
-    #print(algo, " ".join(summary))
+        elif algo == 'UB2':
+            summarizer = ExtractiveUpperbound(language)
+            summary = summarizer(docs, refs, summary_size, ngram_type=2)
+        elif algo == 'ICSI':
+            summarizer = SumeWrap(language)
+            summary = summarizer(docs, summary_size)
+        else:
+            doc_string = u'\n'.join([u'\n'.join(doc_sents) for doc_sents in docs])
+            parser = PlaintextParser.from_string(doc_string, Tokenizer(language))
+            stemmer = Stemmer(language)
+            if algo == 'LSA':
+                summarizer = LsaSummarizer(stemmer)
+            if algo == 'KL':
+                summarizer = KLSummarizer(stemmer)
+            if algo == 'Luhn':
+                summarizer = LuhnSummarizer(stemmer)
+            if algo == 'LexRank':
+                summarizer = LexRankSummarizer(stemmer)
+            if algo == 'TextRank':
+                summarizer = TextRankSummarizer(stemmer)
+
+            summarizer.stop_words = frozenset(stopwords.words(language))
+            summary = summarizer(parser.document, summary_size)
+    except:
+        summary = ""
+    print("Summary:", summary)
     print_scores(algo, summary, refs, rouge, summary_size)
 
 def main():
@@ -85,17 +92,20 @@ def main():
     args = get_args()
     rouge_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'rouge/RELEASE-1.5.5/')
     
-    data_path = os.path.join(args.iobasedir, 'processed/downloads', args.data_set)
+    data_path = os.path.join(args.iobasedir, args.data_setpath)
     log_path = os.path.join(args.iobasedir, 'logs')
-    log_file = os.path.join(args.iobasedir, 'logs', 'baselines_%s.log' % args.data_set)
+    log_file = os.path.join(args.iobasedir, 'logs', 'baselines_%s_%s.log' % (args.data_set, args.summary_size))
     mkdirp(log_path)
     set_logger(log_file)
 
     for filename in os.listdir(data_path):
-        data_file =  os.path.join(data_path, filename)
+        data_file = os.path.join(data_path, filename)
         topic = filename[:-5]
 
-        docs, refs = load_data(data_file)
+        try:
+            docs, refs = load_data(data_file)
+        except:
+            pass
         if not refs:
             continue
 
@@ -109,7 +119,7 @@ def main():
         logger.info('Summmary_len: %d', summary_size)
         
         rouge = Rouge(rouge_dir)
-        algos = ['UB1', 'UB2', 'ICSI', 'Luhn', 'LexRank', 'TextRank', 'LSA', 'KL']
+        algos = ['UB1', 'UB2', 'ICSI', 'Luhn', 'LexRank', 'LSA', 'KL']
         for algo in algos:
             get_summary_scores(algo, docs, refs, summary_size, args.language, rouge)
         rouge._cleanup()

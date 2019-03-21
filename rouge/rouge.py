@@ -16,7 +16,7 @@ class Rouge(object):
         self.temp_config_file = path.join(self.temp_dir, config_file)
         self.peers_dir = path.join(self.temp_dir, "peers")
         self.models_dir = path.join(self.temp_dir, "models")
-        
+
         mkdir(self.peers_dir)
         mkdir(self.models_dir)
 
@@ -47,6 +47,7 @@ class Rouge(object):
         pattern = re.compile(r"(\d+) (ROUGE-\S+) (Average_\w): (\d.\d+) \(95%-conf.int. (\d.\d+) - (\d.\d+)\)")
         results = {}
         output = output.decode("utf-8")
+        #print(output)
         for line in output.split("\n"):
             match = pattern.match(line)
             if match:
@@ -65,7 +66,7 @@ class Rouge(object):
     def execute_rouge(self):
         cmd = "perl " + self.ROUGE_DIR + "ROUGE-1.5.5.pl -e " + self.ROUGE_DIR + "data " + self.ROUGE_ARGS + ' -a ' + self.temp_config_file
         #print("execute_rouge command is" , cmd)
-        
+
         return check_output(cmd, shell=True)
 
     def get_scores(self, summary, models):
@@ -83,9 +84,9 @@ class Rouge(object):
         return results
 
     def __call__(self, summary, models, summary_len):
-        self.ROUGE_ARGS = '-n 4 -m -x -c 95 -r 1000 -f A -p 0.5 -t 0 -a -2 4 -u -l %s' % (summary_len)
+        self.ROUGE_ARGS = '-c 95 -r 1000 -n 2 -a -m -l %s' % (summary_len)
         scores = self.get_scores(summary, models)
-        return scores 
-    
+        return scores
+
     def _cleanup(self):
         shutil.rmtree(self.temp_dir)

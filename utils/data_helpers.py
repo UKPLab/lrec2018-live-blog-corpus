@@ -12,7 +12,7 @@ def load_data(data_path):
 
     return:
         doc_data: list of input documents represented as a list of sentences.
-        summaries: list of summaries represented as a list of sentences. 
+        summaries: list of summaries represented as a list of sentences.
 
     """
     doc_data = []
@@ -29,7 +29,10 @@ def load_data(data_path):
         documents = json_data['documents']
 
         for doc in documents:
-            if doc['is_key_event'] == False:
+            if "is_key_event" in doc:
+                if doc['is_key_event'] == False:
+                    doc_data.append(doc['text'])
+            else:
                 doc_data.append(doc['text'])
     return doc_data, summaries
 
@@ -41,7 +44,7 @@ def extract_ngrams(sentence, stoplist, stemmer, language='english', n=2):
         n (int): the number of words for ngrams, defaults to 2
     """
     concepts = []
-    
+
     # for each ngram of words
     tokens = sent2tokens(sentence, language)
     for j in range(len(tokens)-(n-1)):
@@ -71,7 +74,7 @@ def extract_ngrams(sentence, stoplist, stemmer, language='english', n=2):
     return concepts
 
 def untokenize(tokens):
-    """Untokenizing a list of tokens. 
+    """Untokenizing a list of tokens.
 
     Args:
         tokens (list of str): the list of tokens to untokenize.

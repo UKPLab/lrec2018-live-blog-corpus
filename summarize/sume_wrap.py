@@ -41,12 +41,14 @@ class SumeWrap():
             for sent_id, sentence in enumerate(doc_sents):
                 token_sentence = word_tokenize(sentence, self.LANGUAGE)
                 sentence_s = Sentence(token_sentence, doc_id, sent_id+1)
-                untokenized_form = untokenize(token_sentence)
-                sentence_s.untokenized_form = untokenized_form
-                sentence_s.length = len(untokenized_form.split(' '))
+                #untokenized_form = untokenize(token_sentence)
+                #sentence_s.untokenized_form = untokenized_form
+                sentence_s.untokenized_form = sentence
+                sentence_s.length = len(sentence_s.untokenized_form.split(' '))
                 self.doc_sent_dict[total+sent_id] = "%s_%s" % (str(doc_id), str(sent_id))
                 self.sentences.append(sentence_s)
         return self.sentences
+    
 
     def __call__(self, docs, length=100, units="WORDS", rejected_list=[], imp_list=[], parser_type=None):
         try:

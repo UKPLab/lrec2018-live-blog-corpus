@@ -75,5 +75,5 @@ if __name__ == '__main__':
     summary_len, data_set = get_args()
     ios_basedir = path.join(path.dirname(path.dirname(path.abspath(__file__))))
 
-    data_path = '%s/data/logs/baselines_%s.log' % (ios_basedir, data_set)
+    data_path = '%s/data/logs/baselines_%s_%s.log' % (ios_basedir, data_set, summary_len)
     aggregate = aggregate(data_path)

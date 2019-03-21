@@ -6,7 +6,7 @@ import codecs
 
 def write_to_file(text, filename):
     fp = codecs.open(filename, 'w', 'utf-8', errors='ignore')
-    fp.write(str(text))
+    fp.write(text)
     fp.close()
 
 
